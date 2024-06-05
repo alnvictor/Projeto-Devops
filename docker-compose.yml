@@ -1,0 +1,43 @@
+services:
+  db-sql-devops:
+    image: mysql:latest
+    ports:
+      - "3306:3306"
+    volumes:
+      - db-devops-volume:/data/db
+    restart: always
+    environment:
+      - MYSQL_ROOT_PASSWORD=root
+
+  api:
+    container_name: api-devops
+    build: ./api
+    restart: always
+    ports:
+      - 5002:5002
+    depends_on:
+      - db-sql-devops
+
+  frontend:
+    container_name: frontend-devops
+    build: ./frontend
+    depends_on:
+      - api
+    volumes:
+      - frontend-volume:/var/www/html
+
+  nginx:
+    container_name: nginx-devops
+    build: ./nginx
+    ports:
+      - 80:80
+    volumes:
+      - frontend-volume:/var/www/html
+    depends_on:
+      - db-sql-devops
+      - api
+      - frontend
+
+volumes:
+  db-devops-volume:
+  frontend-volume:
